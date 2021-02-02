@@ -8,59 +8,60 @@
  */
 namespace DBMaker\ODBC\Connectors;
 
-use PDO as PDO;
+use PDO;
+use Exception;
 use DBMaker\ODBC\DBMakerPdo;
 use DBMaker\ODBC\DBMakerODBCPdo;
 use Illuminate\Database\Connectors\Connector;
 use Illuminate\Database\Connectors\ConnectorInterface;
 
 class DBMakerConnector extends Connector implements ConnectorInterface {
-	
-	/**
-	 * Establish a database connection.
-	 *
-	 * @param array $config        	
-	 *
-	 * @return \PDO
-	 * @internal param array $options
-	 *          
-	 */
+
+    /**
+     * Establish a database connection.
+     *
+     * @param array $config
+     *
+     * @return PDO
+     * @throws Exception
+     * @internal param array $options
+     *
+     */
 	public function connect(array $config) {
 		$options = $this->getOptions($config);
 		$dsn = $this->getDsn($config);
-		$connection = $this->createConnection($dsn,$config,$options);
-		return $connection;
+		return $this->createConnection($dsn,$config,$options);
 	}
-	
+
 	/**
 	 * Create a new PDO connection.
 	 *
-	 * @param string $dsn        	
-	 * @param array $config        	
-	 * @param array $options        	
-	 * @return \PDO
-	 *
-	 * @throws \Exception
+	 * @param string $dsn
+	 * @param array $config
+	 * @param array $options
+	 * @return DBMakerODBCPdo|DBMakerPdo|PDO
+     *
+	 * @throws Exception
 	 */
 	public function createConnection($dsn, array $config, array $options) {
-		[$username,$password] = [$config['username'] ?? null,$config['password'] ?? null];
+		[$username, $password] = [$config['username'] ?? null, $config['password'] ?? null];
 		try {
-			return $this->createPdoConnection($dsn,$username,$password,$options);
-		} catch (\Exception $e ) {
-			return new DBMakerODBCPdo($dsn,$username,$password,$options);
+			return $this->createPdoConnection($dsn, $username, $password, $options);
+		} catch (Exception $e) {
+			return new DBMakerODBCPdo($dsn, $username, $password, $options);
 		}
 	}
-	
+
 	/**
 	 * Create a new PDO connection instance.
 	 *
-	 * @param string $dsn        	
-	 * @param string $username        	
-	 * @param string $password        	
-	 * @param array $options        	
-	 * @return \PDO
+	 * @param string $dsn
+	 * @param string $username
+	 * @param string $password
+	 * @param array $options
+	 * @return PDO
 	 */
-	protected function createPdoConnection($dsn,$username,$password,$options) {
+	protected function createPdoConnection($dsn, $username, $password, $options): PDO {
 		return new DBMakerPdo($dsn,$username,$password,$options);
 	}
 	
@@ -70,7 +71,8 @@ class DBMakerConnector extends Connector implements ConnectorInterface {
 	 * @param array $config        	
 	 * @return string
 	 */
-	protected function getDsn(array $config) {
+	protected function getDsn(array $config): string
+    {
 		extract($config,EXTR_SKIP);
 		return $config['dsn'];
 	}
