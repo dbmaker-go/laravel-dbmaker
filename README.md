@@ -42,9 +42,11 @@ It's very simple to configure:
     'username' => 'username',
     'password' => 'password',
     'options' => [
-            'idcap' => 1   //please set the value same as your server db_idcap
+            'idcap' => 1,   //please set the value same as your server db_idcap
+            'dbidcap' => 1, //optional parameter, used to return LOWER or UPPER keys result (for default is lower)
+
     ]
-]
+];
 ```
 
 **2) set default database to dbmaker**
