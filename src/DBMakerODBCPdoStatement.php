@@ -11,31 +11,32 @@ namespace DBMaker\ODBC;
 use PDOStatement;
 
 class DBMakerODBCPdoStatement extends PDOStatement {
-	protected $query;
+
+    protected $query;
 	protected $options;
 	protected $params = [];
 	protected $statement;
-	
+
 	/**
 	 *
-	 * @param string $conn        	
-	 * @param string $query        	
-	 * @return Dbmaker\Odbc\DBMakerPdo
+	 * @param resource $conn
+	 * @param string $query
 	 */
-	public function __construct($conn,$query,$options = []) {
+	public function __construct($conn, $query, $options = []) {
 		$this->query = preg_replace('/(?<=\s|^):[^\s:]++/um','?',$query);
 		$this->params = $this->getParamsFromQuery($query);
 		$this->statement = odbc_prepare($conn,$this->query);
 		$this->options = $options;
 	}
-	
-	/**
-	 * get Params From Query String
-	 *
-	 * @param string $qry        	
-	 * @return array
-	 */
-	protected function getParamsFromQuery($query) {
+
+    /**
+     * get Params From Query String
+     *
+     * @param $query
+     * @return array
+     */
+	protected function getParamsFromQuery($query): array
+    {
 		$params = [];
 		$qryArray = explode(" ",$query);
 		$i = 0;
@@ -51,18 +52,18 @@ class DBMakerODBCPdoStatement extends PDOStatement {
 	 *
 	 * @return int
 	 */
-	public function rowCount() {
+	public function rowCount(): int {
 		return odbc_num_rows($this->statement);
 	}
-	
+
 	/**
 	 *
-	 * @param string $param        	
-	 * @param string $val        	
-	 * @param string $ignore        	
+	 * @param string $param
+	 * @param string $val
+	 * @param string $ignore
 	 * @return void
 	 */
-	public function bindValue($param,$val,$ignore = null) {
+	public function bindValue($param, $val, $ignore = null): void {
 		$this->params[$param] = $val;
 	}
 	
@@ -71,18 +72,23 @@ class DBMakerODBCPdoStatement extends PDOStatement {
 	 * @param array $ignore        	
 	 * @return void
 	 */
-	public function execute($ignore = null) {
+	public function execute($ignore = null): void {
 		odbc_execute($this->statement,$this->params);
 		$this->params = [];
 	}
-	
-	public function fetchAll($how = NULL, $class_name = NULL, $ctor_args = NULL) {
+
+    /**
+     * @param null $how
+     * @param null $class_name
+     * @param null $ctor_args
+     * @return array
+     */
+	public function fetchAll($how = null, $class_name = null, $ctor_args = null): array {
 		$records = [];
 		while($record = $this->fetch()) {
 			$records [] = $record;
 		}
-		if ($this->options['dbidcap'] == 1)
-			$this->keysToLower($records);
+		if (isset($this->options['idcap']) && $this->options['idcap'] == 1) $this->keysToLower($records);
 		return $records;
 	}
 	
@@ -92,18 +98,23 @@ class DBMakerODBCPdoStatement extends PDOStatement {
 	 * @param array $option        	
 	 * @param array $ignore        	
 	 * @param array $ignore2        	
-	 * @return array
+	 * @return array|false|object
 	 */
 	public function fetch($option = null, $ignore = null,$ignore2 = null) {
 		return odbc_fetch_object($this->statement);
 	}
+
+    /**
+     * @param $obj
+     * @return mixed|object
+     */
 	function &keysToLower(&$obj) {
-		if(is_object($obj)) {
+		if (is_object($obj)) {
 			$newobj = (object)array();
 			foreach($obj as $key => &$val)
 				$newobj->{strtolower($key)} = $this->keysToLower($val);
 			$obj = $newobj;
-		}else if(is_array($obj))
+		} else if(is_array($obj))
 			foreach($obj as &$value)
 				$this->keysToLower($value);
 		return $obj;

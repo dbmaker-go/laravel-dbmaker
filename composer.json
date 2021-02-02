@@ -7,10 +7,10 @@
 		"Database",
 		"PDO",
 		"ODBC"
-	    ],
+	],
 	"type": "library",
-    	"license": "MIT",
-	"homepage": "http://www.dbmaker.com.tw",
+	"license": "MIT",
+	"homepage": "https://github.com/dbmaker-go/laravel-dbmaker",
 	"authors": [
 		{
 			"name": "syscom",
@@ -20,25 +20,27 @@
 		}
 	],
 	"require": {
-		 "php": ">=7.3",
-       	 "illuminate/database": ">5.8",
-		 "laravel/framework": ">5.8"
+		"php": ">=7.3",
+		"illuminate/database": ">5.8",
+		"laravel/framework": ">5.8",
+		"ext-pdo": "*",
+		"ext-odbc": "*"
 	},
-  	"autoload": { 
-	    "psr-4": {
-		"DBMaker\\ODBC\\": "src/"
-	    },
-	    "classmap": [
-	      "src/"
-	    ]
-	 } ,
-    "extra": {
-        "laravel": {
-            "providers": [
-                "DBMaker\\ODBC\\DBMakerServiceProvider"
-            ]
-        }
-    }
+	"autoload": {
+		"psr-4": {
+			"DBMaker\\ODBC\\": "src/"
+		},
+		"classmap": [
+			"src/"
+		]
+	} ,
+	"extra": {
+		"laravel": {
+			"providers": [
+				"DBMaker\\ODBC\\DBMakerServiceProvider"
+			]
+		}
+	}
 
 
 }
