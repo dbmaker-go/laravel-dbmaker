@@ -1,82 +1,67 @@
 <?php
 
-/**
- * Created by syscom.
- * User: syscom
- * Date: 17/06/2019
- * Time: 15:50
- */
-
 namespace DBMaker\ODBC;
-
-use Exception;
 
 class DBMakerODBCPdo
 {
     protected $connection;
-    protected $options ;
+
+    protected $options;
 
     /**
-     * Get the column listing for a given table.
-     *
-     * @param  string  $dsn
-     * @param  string  $username
-     * @param  string  $passwd
-     * @param  array   $options
-     * @return array
+     * DBMakerODBCPdo constructor.
      */
-    public function __construct($dsn,$username,$passwd,$options=[]) {
-    	 $connect = odbc_connect($dsn,$username,$passwd);
+    public function __construct(string $dsn, string $username, string $passwd, array $options = [])
+    {
+        $connect = odbc_connect($dsn, $username, $passwd);
         $this->setConnection($connect);
         $this->options = $options;
     }
 
-    public function exec($query) {
+    public function prepare(string $statement, ?array $driver_options = null): DBMakerODBCPdoStatement
+    {
+        return new DBMakerODBCPdoStatement($this->connection, $statement, $this->options);
+    }
+
+    /**
+     * @return bool
+     */
+    public function exec(string $query)
+    {
         return $this->prepare($query)->execute();
     }
 
-    /**
-     *
-     * @param  string  $statement
-     * @param  array  $driver_options
-     * @return Dbmaker\Odbc\DBMakerODBCPdoStatement	
-     */
-    public function prepare($statement,$driver_options = null) {
-    	  return new DBMakerODBCPdoStatement($this->getConnection(),$statement,$this->options);
+    public function beginTransaction(): void
+    {
+        odbc_autocommit($this->connection, false);
+    }
+
+    public function commit(): bool
+    {
+        return odbc_commit($this->connection);
+    }
+
+    public function rollBack(): bool
+    {
+        $rollback = odbc_rollback($this->connection);
+        odbc_autocommit($this->connection, true);
+
+        return $rollback;
     }
 
     /**
-     * @return mixed
+     * @return resource
      */
-    public function getConnection() {
+    public function getConnection()
+    {
         return $this->connection;
     }
 
     /**
-     * @param mixed $connection
-     * @return void
+     * @param  resource  $connection
      */
-    public function setConnection($connection) {
-		$this->connection = $connection;
-	}
-    
-    /**
-     * @return void
-     */
-    public function commit() {
-        return odbc_commit($this->getConnection());
-     }
-     
-    public function rollBack() {
-        $rollback = odbc_rollback($this->getConnection());
-        odbc_autocommit($this->getConnection(),true);
-        return $rollback;
-    }
-    
-    /**
-     * @return void
-     */
-    public function beginTransaction() {
-        odbc_autocommit($this->getConnection(),false);
+    protected function setConnection($connection): void
+    {
+        $this->connection = $connection;
     }
 }
